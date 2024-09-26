@@ -1,4 +1,3 @@
-// const BASE_API = "http://127.0.0.1:8000/api/products?page=2";
 document.addEventListener("alpine:init", () => {
   Alpine.data("products", () => ({
     items: [
@@ -15,13 +14,6 @@ document.addEventListener("alpine:init", () => {
         price: 30000,
       },
     ],
-    // init() {
-    //   fetch(BASE_API)
-    //     .then((response) => response.json())
-    //     .then((data) => {
-    //       this.items = data.data;
-    //     });
-    // },
   }));
 
   Alpine.store("cart", {

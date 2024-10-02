@@ -1,119 +1,99 @@
+Landing Page Kopi App :
+git clone https://github.com/isanmh/kopi-app.git
+
+Final Project Midtrans Snap Native :
+https://github.com/isanmh/transkopi
+
 Cara menggunakan midtrans payment gateway :
 1. Buka website midtrans : https://www.midtrans.com/
 2. daftar akun midtrans
 3. ganti environment ke sandbox
 
-https://fakestoreapi.com/products?limit=5
-
-Rest api dari global :
+REST API dari Backend :
 // isi dari api products
+const url = "http://localhost:3001/products";
 init() {
-    fetch("http://127.0.0.1:8000/api/products?page=2")
+    fetch("url")
     .then((res) => res.json())
     .then((data) => {
         this.items = data.data;
     });
 },
 
-<!-- item input tipe hidden untuk dikirim ke midtrans -->
-<input
-    type="hidden"
-    name="items"
-    x-model="JSON.stringify($store.cart.items)"
-/>
-<input type="hidden" name="total" x-model="$store.cart.total" />
-
-
-// hidde btn 
-style.css
-/* disabled */
-.form-container .checkout-button.disabled {
-  background-color: #999;
-  cursor: not-allowed;
-}
-
-// app.js
-// button hidden
-const checkoutButton = document.querySelector(".checkout-button");
-const form = document.querySelector("#checkoutForm");
-
-// form validation
-checkoutButton.disabled = true;
-
-form.addEventListener("keyup", function () {
-  for (let i = 0; i < form.elements.length; i++) {
-    if (form.elements[i].value.length !== 0) {
-      checkoutButton.classList.remove("disabled");
-      checkoutButton.classList.add("disabled");
-    } else {
-      return false;
-    }
-  }
-  checkoutButton.disabled = false;
-  checkoutButton.classList.remove("disabled");
-});
-
-// kirim data ketika tombol add to cart di klik
-checkoutButton.addEventListener("click", async function (e) {
-  e.preventDefault();
-
-  const formData = new FormData(form);
-  const data = new URLSearchParams(formData);
-  const objData = Object.fromEntries(data);
-  console.log(objData);
-  // const message = formatMessage(objData);
-  // window.open(
-  //   `http://wa.me/6285352044517?text=${encodeURIComponent(message)}`,
-  //   "_blank"
-  // );
-
-  // // minta transaksi token ke snap
-  try {
-    const response = await fetch("php/orderSnap.php", {
-      method: "POST",
-      body: data,
-    });
-    const token = await response.text();
-    console.log(token);
-
-    // window.snap.pay(token);
-  } catch (err) {
-    console.log(err.message);
-  }
-});
-
-// format message WA
-const formatMessage = (obj) => {
-  return `Data Customer
-  Nama: ${obj.name}
-  Email: ${obj.email}
-  No. HP: ${obj.phone}
-Data Pesanan: 
-${JSON.parse(obj.items).map(
-  (item) => `${item.name} (${item.quantity} x ${rupiah(item.total)}) \n`
-)}
-Total: ${rupiah(obj.total)}`;
-};
-
-
-app.js
-// kirim data ketika tombol add to cart di klik
-const checkoutButton = document.querySelector(".checkout-button");
-const form = document.querySelector("#checkoutForm");
-
-checkoutButton.addEventListener("click", function (e) {
-  e.preventDefault();
-
-  const formData = new FormData(form);
-  const data = new URLSearchParams(formData);
-  const objData = Object.fromEntries(data);
-  console.log(objData);
-});
-
-
-Cara Integrasi Snap Midtrans :
+=====================
+4. Cara Integrasi Snap Midtrans :
 https://docs.midtrans.com/docs/snap-snap-integration-guide
 
-buat server php :
-php/midtrans-php-master
+buat server php dengan folder php/orderSnap.php :
 php/orderSnap.php
+
+<?php
+
+/*Install Midtrans PHP Library (https://github.com/Midtrans/midtrans-php)
+composer require midtrans/midtrans-php
+                              
+Alternatively, if you are not using **Composer**, you can download midtrans-php library 
+(https://github.com/Midtrans/midtrans-php/archive/master.zip), and then require 
+the file manually.   
+
+require_once dirname(__FILE__) . '/pathofproject/Midtrans.php'; */
+require_once dirname(__FILE__) . '/midtrans-php-master/Midtrans.php';
+
+
+//SAMPLE REQUEST START HERE
+
+// Set your Merchant Server Key
+\Midtrans\Config::$serverKey = 'SB-Mid-server-Jjn8-cjHppTqKoyddDCiF9OU';
+// Set to Development/Sandbox Environment (default). Set to true for Production Environment (accept real transaction).
+\Midtrans\Config::$isProduction = false;
+// Set sanitization on (default)
+\Midtrans\Config::$isSanitized = true;
+// Set 3DS transaction for credit card to true
+\Midtrans\Config::$is3ds = true;
+
+$params = array(
+    'transaction_details' => array(
+        'order_id' => rand(),
+        'gross_amount' => $_POST['total'],
+    ),
+    'item_details' => json_decode($_POST['items'], true),
+    'customer_details' => array(
+        'first_name' => $_POST['name'],
+        'email' => $_POST['email'],
+        'phone' => $_POST['phone'],
+    ),
+);
+
+$snapToken = \Midtrans\Snap::getSnapToken($params);
+
+echo $snapToken;
+
+===============
+5. Download library Snap Midtrans PHP :
+https://github.com/Midtrans/midtrans-php/archive/master.zip
+php/midtrans-php-master
+
+6. Setting Frontend midtrans snap di head index.html :
+
+<!-- midtrans snap -->
+<script
+  type="text/javascript"
+  src="https://app.sandbox.midtrans.com/snap/snap.js"
+  data-client-key="SB-Mid-client-VyluAoNv1vUnHhXk"
+></script>
+
+
+7. minta transaction Token dengan Fetch setting Snap di app.js :
+// minta transaksi token ke snap 
+try {
+  const response = await fetch("php/orderSnap.php", {
+    method: "POST",
+    body: data,
+  });
+  const token = await response.text();
+  console.log(token);
+
+  // window.snap.pay(token);
+} catch (err) {
+  console.log(err.message);
+}

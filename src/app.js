@@ -109,7 +109,7 @@ checkoutButton.addEventListener("click", async function (e) {
   console.log(objData);
   // const message = formatMessage(objData);
   // window.open(
-  //   `http://wa.me/6285352044517?text=${encodeURIComponent(message)}`,
+  //   `http://wa.me/6282233505516?text=${encodeURIComponent(message)}`,
   //   "_blank"
   // );
 
